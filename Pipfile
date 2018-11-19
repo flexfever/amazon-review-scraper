@@ -8,7 +8,9 @@ python_version = '3.6'
 
 [packages]
 dateutil = { git = 'https://github.com/dateutil/dateutil.git' }
+fake_useragent = '*'
 lxml = '*'
+python-dotenv = '*'
 requests = '*'
 
 [dev-packages]
