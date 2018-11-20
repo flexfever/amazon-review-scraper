@@ -1,29 +1,29 @@
-import os
-
-from scraper.scraper import Scraper
-from scraper.reviews_parser import ReviewsParser
-from scraper.request.request_service import RequestService
-from scraper.request.method import *
+from scraper.product import Product
 
 from dotenv import load_dotenv
-import os
+import json
 
 
+def read_product(asin):
+    product = Product(asin)
+
+    with open(f'{product.asin}.json', 'w', encoding='utf8') as file:
+        file.write('')
+
+    with open(f'{product.asin}.json', 'a', encoding='utf8') as file:
+        file.write('[\n')
+        count = 0
+        for review in product.get_reviews():
+            json.dump(review, file, indent=4, ensure_ascii=False)
+            if count < product.total_review_count - 1:
+                file.write(',\n')
+            else:
+                file.write('\n')
+            count += 1
+        file.write(']\n')
 
 if __name__ == "__main__":
     load_dotenv(verbose=True)
 
-    # scraper = Scraper()
-    # scraper.read_asins(['B0776MN1XL'])
-
-    reviews_parser = ReviewsParser()
-    reviews_parser.process_asin('B0776MN1XL')
-
-
-    #
-    # url = 'http://httpbin.org/headers'
-    # # url = 'http://lumtest.com/myip.json'
-    # code, response = request_service.send_request(GET, url)
-    # print(code)
-    # print(response)
-    #
+    read_product('B0776MN1XL')
+    read_product('B07C33N94K')

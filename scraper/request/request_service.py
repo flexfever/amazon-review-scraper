@@ -2,9 +2,55 @@ from fake_useragent import UserAgent
 import requests
 import os
 
-from scraper.request.method import Method
-
 class RequestService:
+    class RequestException(Exception):
+        def __init__(self, method, url, headers, payload, response, status_code):
+            self.method = method
+            self.url = url
+            self.headers = headers
+            self.payload = payload
+            self.response = response
+            self.status_code = status_code
+            message =\
+                f"Error sending request: {method} {url} returned {status_code}.\n" \
+                f"Headers: {headers}\n" \
+                f"Payload: {payload}\n" \
+                f"Response: {response}\n"
+            super().__init__(message)
+
+    class BadRequestException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 400)
+
+    class UnauthorizedException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 401)
+
+    class RecordNotFoundException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 404)
+
+    class InternalServerException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 500)
+
+    class BadGatewayException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 502)
+
+    class GatewayTimeoutException(RequestException):
+        def __init__(self, method, url, headers, payload, response):
+            super().__init__(method, url, headers, payload, response, 504)
+
+    ERROR_CODE_MAP = {
+        400: BadRequestException,
+        401: UnauthorizedException,
+        404: RecordNotFoundException,
+        500: InternalServerException,
+        502: BadGatewayException,
+        504: GatewayTimeoutException
+    }
+
     def __init__(self):
         self.user_agent_generator = UserAgent()
 
@@ -28,17 +74,24 @@ class RequestService:
 
     def send_request(self, method, url):
         session = requests.Session()
-        session.headers = self.build_headers()
+        headers = session.headers = self.build_headers()
+        payload = {}
         session.proxies = self.get_proxies()
 
-        for i in range(1):
-            if method == Method.GET:
-                response = session.get(url, verify=False)
-            else:
-                return None
+        functor = RequestService.get_request_method_functor(session, method)
 
-            code = response.status_code
-            if code == 200:
-                return response.text
+        # Send the request
+        response = functor(url)
 
-        return None
+        status_code = response.status_code
+        if status_code >= 400:
+            error = RequestService.ERROR_CODE_MAP[status_code]
+            raise error(method, url, headers, payload, response.text)
+        else:
+            return response.text
+
+    @staticmethod
+    def get_request_method_functor(session, http_method):
+        functor_name = http_method.value
+        functor = getattr(session, functor_name)
+        return functor

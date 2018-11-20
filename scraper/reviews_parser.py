@@ -1,52 +1,10 @@
 from lxml import html
-import json
 from dateutil import parser as dateparser
 import math
-import time
-import codecs
-
-from scraper.request.request_service import RequestService
-from scraper.request.method import *
 
 class ReviewsParser:
-    AMAZON_URL = 'http://www.amazon.com/dp/product-reviews'
-
-    @classmethod
-    def build_url(cls, asin, page):
-        url = ''
-        url += cls.AMAZON_URL
-        url += '/' + asin
-        url += '/?pageNumber=' + str(page)
-        return url
-
-    def __init__(self):
-        self.request_service = RequestService()
-
-    def process_asin(self, asin):
-        url = ReviewsParser.build_url(asin, 1)
-        page = self.load_page(url)
-
-        total_review_count = self.get_total_review_count(page)
-        page_count = self.get_page_count(total_review_count)
-
-        parsed_reviews = []
-        for i in range(1, page_count + 1):
-            url = ReviewsParser.build_url(asin, i)
-            page = self.load_page(url)
-            reviews = self.parse_reviews(page)
-            if reviews is not None:
-                parsed_reviews.extend(reviews)
-            time.sleep(0.1)
-
-        with open('reviews.json', 'w', encoding='utf8') as file:
-            json.dump(parsed_reviews, file, indent=4, ensure_ascii=False)
-
-    def load_page(self, url):
-        page = self.request_service.send_request(GET, url)
-        return page
-
-    def get_total_review_count(self, page):
-        parser = html.fromstring(page)
+    def get_total_review_count(self, page_text):
+        parser = html.fromstring(page_text)
         XPATH_TOTAL_REVIEWS = './/span[@data-hook="total-review-count"]//text()'
         raw_total_reviews = parser.xpath(XPATH_TOTAL_REVIEWS)[0]
         total_reviews = int(raw_total_reviews)
@@ -57,8 +15,8 @@ class ReviewsParser:
         pages = int(math.ceil(total_review_count / reviews_per_page))
         return pages
 
-    def parse_reviews(self, page):
-        parser = html.fromstring(page)
+    def parse_reviews(self, page_text):
+        parser = html.fromstring(page_text)
         XPATH_REVIEW = './/div[@data-hook="review"]'
 
         reviews = parser.xpath(XPATH_REVIEW)

@@ -1,12 +1,12 @@
 from enum import Enum
 
 class Method(Enum):
-    GET = 1
-    POST = 2
-    PUT = 3
-    DELETE = 4
+    DELETE = 'delete'
+    GET = 'get'
+    POST = 'post'
+    PUT = 'put'
 
+DELETE = Method.DELETE
 GET = Method.GET
 POST = Method.POST
 PUT = Method.PUT
-DELETE = Method.DELETE
