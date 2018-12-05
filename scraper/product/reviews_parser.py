@@ -1,12 +1,22 @@
 from lxml import html
 from dateutil import parser as dateparser
 import math
+import re
 
 class ReviewsParser:
+    def get_rating(self, page_text):
+        parser = html.fromstring(page_text)
+        XPATH_RATING = './/span[@data-hook="rating-out-of-text"]//text()'
+        raw_rating = parser.xpath(XPATH_RATING)[0]
+
+        regex = r'(\d[.\d]*) out of 5 stars'
+        rating = re.match(regex, raw_rating).group(1)
+        return float(rating)
+
     def get_total_review_count(self, page_text):
         parser = html.fromstring(page_text)
         XPATH_TOTAL_REVIEWS = './/span[@data-hook="total-review-count"]//text()'
-        raw_total_reviews = parser.xpath(XPATH_TOTAL_REVIEWS)[0]
+        raw_total_reviews = parser.xpath(XPATH_TOTAL_REVIEWS)[0].replace(',', '')
         total_reviews = int(raw_total_reviews)
         return int(total_reviews)
 

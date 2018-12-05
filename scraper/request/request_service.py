@@ -4,48 +4,50 @@ import os
 
 class RequestService:
     class RequestException(Exception):
-        def __init__(self, method, url, headers, payload, response, status_code):
+        def __init__(self, method, url, headers, params, response, status_code):
             self.method = method
             self.url = url
             self.headers = headers
-            self.payload = payload
+            self.params = params
             self.response = response
             self.status_code = status_code
             message =\
                 f"Error sending request: {method} {url} returned {status_code}.\n" \
                 f"Headers: {headers}\n" \
-                f"Payload: {payload}\n" \
+                f"Params: {params}\n" \
                 f"Response: {response}\n"
             super().__init__(message)
 
     class BadRequestException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 400)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 400)
 
     class UnauthorizedException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 401)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 401)
 
     class RecordNotFoundException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 404)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 404)
 
     class InternalServerException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 500)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 500)
 
     class BadGatewayException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 502)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 502)
 
     class GatewayTimeoutException(RequestException):
-        def __init__(self, method, url, headers, payload, response):
-            super().__init__(method, url, headers, payload, response, 504)
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 504)
 
     ERROR_CODE_MAP = {
         400: BadRequestException,
         401: UnauthorizedException,
+        403: None,
         404: RecordNotFoundException,
+        422: None,
         500: InternalServerException,
         502: BadGatewayException,
         504: GatewayTimeoutException
@@ -68,25 +70,29 @@ class RequestService:
         proxy_url = os.getenv("PROXY_URL")
         proxy_port = os.getenv("PROXY_PORT")
         proxies = {
-            'http': f'http://{username}:{password}@{proxy_url}:{proxy_port}'
+            'http': f'http://{username}:{password}@{proxy_url}:{proxy_port}',
+            'https': f'http://{username}:{password}@{proxy_url}:{proxy_port}'
         }
         return proxies
 
-    def send_request(self, method, url):
+    def send_request(self, method, url, params = None):
         session = requests.Session()
         headers = session.headers = self.build_headers()
-        payload = {}
         session.proxies = self.get_proxies()
 
         functor = RequestService.get_request_method_functor(session, method)
 
         # Send the request
-        response = functor(url)
+
+        print(f"Sending request to {url}")
+        print(f"Params: {params}")
+
+        response = functor(url, params=params, verify=False)
 
         status_code = response.status_code
         if status_code >= 400:
             error = RequestService.ERROR_CODE_MAP[status_code]
-            raise error(method, url, headers, payload, response.text)
+            raise error(method, url, headers, params, response.text)
         else:
             return response.text
 
