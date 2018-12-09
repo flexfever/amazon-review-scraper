@@ -10,6 +10,10 @@ class Product:
         self._product_meta = ProductMeta(self)
         self._reviews_meta = ReviewsMeta(self)
 
+    def load(self):
+        self._product_meta.initialize()
+        self._reviews_meta.initialize()
+
     @property
     def product_meta(self):
         return self._product_meta

@@ -1,3 +1,5 @@
+from scraper.utils import to_serializable
+
 class Result:
     def __init__(self, element):
         self.element = element
@@ -37,3 +39,7 @@ class Result:
             'search_rank': self.search_rank,
             'sponsored': self.sponsored
         }
+
+@to_serializable.register(Result)
+def ts_result(val):
+    return val.as_dict()

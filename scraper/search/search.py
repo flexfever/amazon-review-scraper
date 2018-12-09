@@ -1,33 +1,40 @@
 from lxml import html
 import re
 
-from scraper.request.request_service import RequestService
-from scraper.request.method import *
+from scraper.search.search_page import SearchPage
+from scraper.search.search_meta import SearchMeta
 from scraper.search.result import Result
 
 class Search:
-    SEARCH_BASE_URL = 'https://www.amazon.com/s/ref=nb_sb_ss'
-
-    KEYWORDS_KEY = 'field-keywords'
-
     def __init__(self, search_string):
-        self.request_service = RequestService()
         self.search_string = search_string
+        self._page = SearchPage(self)
+        self._search_meta = SearchMeta(self)
+
+    def load(self):
+        self._search_meta.initialize()
+        self._page.load()
 
     def get_results(self):
-        page_text = self.execute()
-        results = self.parse_results(page_text)
+        results = self._parse_results()
         return results
 
-    def parse_results(self, page_text):
+    @property
+    def page(self):
+        return self._page
+
+    @property
+    def search_meta(self):
+        return self._search_meta
+
+    def _parse_results(self):
+        page_text = self.page.text
         parser = html.fromstring(page_text)
 
         result_regex = r'id="result_\d+"'
         results = re.findall(result_regex, page_text)
         results = list(set(results))
         result_count = len(results)
-
-        print(result_count)
 
         XPATH_PRODUCT_TEMPLATE = '//li[@id="result_{}"]'
 
@@ -52,18 +59,3 @@ class Search:
             products.append(product)
 
         return products
-
-    def execute(self):
-        search_string = self.search_string
-        payload = {
-            'url': 'search-alias=aps',
-            Search.KEYWORDS_KEY: search_string
-        }
-        response = self.request_service.send_request(GET, Search.SEARCH_BASE_URL, payload)
-
-        with open(f'{search_string}.html', 'a', encoding='utf8') as file:
-            file.write(response)
-
-        return response
-
-

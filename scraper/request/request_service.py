@@ -38,6 +38,10 @@ class RequestService:
         def __init__(self, method, url, headers, params, response):
             super().__init__(method, url, headers, params, response, 502)
 
+    class ServiceUnavailableException(RequestException):
+        def __init__(self, method, url, headers, params, response):
+            super().__init__(method, url, headers, params, response, 503)
+
     class GatewayTimeoutException(RequestException):
         def __init__(self, method, url, headers, params, response):
             super().__init__(method, url, headers, params, response, 504)
@@ -50,6 +54,7 @@ class RequestService:
         422: None,
         500: InternalServerException,
         502: BadGatewayException,
+        503: ServiceUnavailableException,
         504: GatewayTimeoutException
     }
 
