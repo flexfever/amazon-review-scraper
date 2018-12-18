@@ -1,4 +1,4 @@
-from scraper.page import Page
+from scraper.core.page import Page
 
 class ProductPage(Page):
     BASE_URL = 'http://www.amazon.com/dp'

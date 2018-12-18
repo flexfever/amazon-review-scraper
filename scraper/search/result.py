@@ -1,4 +1,4 @@
-from scraper.utils import to_serializable
+from scraper.core.utils import to_serializable
 
 class Result:
     def __init__(self, element):

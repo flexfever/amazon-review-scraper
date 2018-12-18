@@ -1,4 +1,4 @@
-from scraper.page import Page
+from scraper.core.page import Page
 
 class SearchPage(Page):
     BASE_URL = 'https://www.amazon.com/s/ref=nb_sb_ss'

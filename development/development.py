@@ -1,6 +1,6 @@
 from scraper.product.product import Product
 from scraper.search.search import Search
-from scraper.utils import to_serializable
+from scraper.core.utils import to_serializable
 
 from dotenv import load_dotenv
 import json
@@ -58,11 +58,11 @@ if __name__ == "__main__":
     with open(f'{directory}/search.json', 'w', encoding='utf8') as file:
         json.dump(search_dict, file, default=to_serializable, indent=4)
 
-    for i, result in enumerate(results):
-        print(i, result.asin, result.search_rank, result.sponsored)
-        read_product(directory, result.asin)
+    # for i, result in enumerate(results):
+    #     print(i, result.asin, result.search_rank, result.sponsored)
+    #     read_product(directory, result.asin)
     #
     # read_product('B0776MN1XL')
-    # read_product(directory, 'B07C33N94K')
+    read_product(directory, 'B07C33N94K')
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from scraper.utils import to_serializable
+from scraper.core.utils import to_serializable
 
 class SearchMeta:
     def __init__(self, search):

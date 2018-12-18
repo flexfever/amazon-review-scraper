@@ -14,13 +14,14 @@ current_directory = path.abspath(path.dirname(__file__))
 
 setup(
     name='amazon-review-scraper',
-    version='0.0.2',
+    version='0.0.3',
     description=get_long_description(current_directory),
 
     packages=[
+        'scraper.core',
         'scraper.product',
         'scraper.request',
-        'scraper.search'
+        'scraper.search',
     ],
     include_package_data=True
 )

@@ -1,4 +1,4 @@
-from scraper.page import Page
+from scraper.core.page import Page
 from scraper.product.reviews_parser import ReviewsParser
 
 class ReviewsPage(Page):
