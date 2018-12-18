@@ -14,7 +14,7 @@ current_directory = path.abspath(path.dirname(__file__))
 
 setup(
     name='amazon-review-scraper',
-    version='0.0.3',
+    version='0.0.4',
     description=get_long_description(current_directory),
 
     dependency_links=[
@@ -22,7 +22,7 @@ setup(
     ],
 
     install_requires=[
-        'dateutil',
+        'python-dateutil',
         'fake_useragent',
         'lxml',
         'requests'
