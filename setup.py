@@ -17,6 +17,17 @@ setup(
     version='0.0.3',
     description=get_long_description(current_directory),
 
+    dependency_links=[
+        'https://github.com/dateutil/dateutil.git'
+    ],
+
+    install_requires=[
+        'dateutil',
+        'fake_useragent',
+        'lxml',
+        'requests'
+    ],
+
     packages=[
         'scraper.core',
         'scraper.product',
